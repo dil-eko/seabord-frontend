@@ -67,7 +67,7 @@ export default function ArcgisEmbed({
     );
   }
 
-  // Responsive 16:9; adjust paddingTop for a taller map if you prefer (e.g., 66.66% or 75%)
+  // Responsive 16:9; increase paddingTop to 66.66% or 75% for a taller map
   return (
     <div className="my-6">
       {title && <h3 className="text-base font-medium mb-2">{title}</h3>}

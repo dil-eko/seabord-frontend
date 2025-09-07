@@ -1,8 +1,11 @@
-// Server-side base URL
+// Server-side base URL (never exposed to the browser)
 const BASE = process.env.DRUPAL_BASE_URL!;
 const PUBLIC_BASE = process.env.NEXT_PUBLIC_DRUPAL_BASE_URL!;
 
-// ---- JSON:API minimal types ----
+// If your paragraphs relationship machine name is different, change this once:
+export const ARCGIS_REL = 'field_arcgis_sections';
+
+// ---- JSON:API minimal types we actually use ----
 type JsonApiIdRef = { id: string; type: string };
 
 type RelationshipSingle = { data?: JsonApiIdRef | null };
@@ -26,6 +29,7 @@ interface ArcgisSection {
   attributes?: {
     field_title?: string | null;
     field_type?: 'storymap' | 'experience' | (string & {}) | null;
+    // Link field may be string OR object with uri
     field_url?: string | { uri?: string; title?: string; options?: unknown } | null;
     field_notes?: string | null;
   };
@@ -36,11 +40,13 @@ export function arcgisUrlFromSection(s: ArcgisSection): string {
   const val = s.attributes?.field_url as unknown;
   let raw = '';
   if (typeof val === 'string') raw = val;
-  else if (val && typeof val === 'object' && 'uri' in val && typeof (val as any).uri === 'string') {
-    raw = (val as any).uri;
+  else if (val && typeof val === 'object' && 'uri' in (val as Record<string, unknown>)) {
+    const obj = val as { uri?: string };
+    raw = obj.uri || '';
   }
   return raw ?? '';
 }
+
 type IncludedItem = MediaImage | FileResource | ArcgisSection;
 export type IncludedArray = IncludedItem[];
 
@@ -48,6 +54,9 @@ interface ExhibitionAttributes {
   title: string;
   field_slug?: string | null;
   field_brief?: string | null;
+  // One of these will exist depending on your field machine name:
+  body?: { processed?: string | null } | null;
+  field_body?: { processed?: string | null } | null;
   path?: { alias?: string | null };
 }
 
@@ -55,11 +64,7 @@ export interface ExhibitionNode {
   id: string;
   type: string; // "node--exhibition"
   attributes: ExhibitionAttributes;
-  relationships?: {
-    field_thumbnail?: RelationshipSingle;
-    field_hero?: RelationshipSingle;
-    field_arcgis_sections?: RelationshipMany;
-  };
+  relationships?: Record<string, RelationshipSingle | RelationshipMany | undefined>;
 }
 
 interface ExhibitionsResponse {
@@ -74,6 +79,7 @@ async function api<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+// LIST page (teasers)
 export async function fetchExhibitions(): Promise<ExhibitionsResponse> {
   const fields = ['title', 'field_slug', 'path', 'field_brief', 'field_thumbnail', 'field_hero'];
   const include = [
@@ -90,20 +96,35 @@ export async function fetchExhibitions(): Promise<ExhibitionsResponse> {
   return api<ExhibitionsResponse>(`/jsonapi/node/exhibition${qs}`);
 }
 
+// DETAIL by slug (includes body + arcgis sections)
 export async function fetchExhibitionDetailBySlug(
   slug: string
 ): Promise<ExhibitionsResponse> {
+  const fields = [
+    'title',
+    'field_slug',
+    'path',
+    'field_brief',
+    'body',
+    'field_body',
+    'field_hero',
+    'field_thumbnail',
+    ARCGIS_REL,
+  ];
   const include = [
     'field_hero',
     'field_hero.field_media_image',
     'field_thumbnail',
     'field_thumbnail.field_media_image',
-    'field_arcgis_sections',
+    ARCGIS_REL,
   ];
+
   const qs =
     `?filter[field_slug][value]=${encodeURIComponent(slug)}` +
     `&filter[status]=1&page[limit]=1` +
+    `&fields[node--exhibition]=${fields.join(',')}` +
     `&include=${include.join(',')}`;
+
   return api<ExhibitionsResponse>(`/jsonapi/node/exhibition${qs}`);
 }
 
@@ -129,6 +150,21 @@ export function fileUrl(
   return null;
 }
 
+// Pick the ArcGIS relationship from node.relationships (supports a fallback name)
+export function getArcgisRelationship(
+  node: ExhibitionNode
+): RelationshipMany | undefined {
+  const rels = node.relationships || {};
+  const primary = rels[ARCGIS_REL] as RelationshipMany | undefined;
+  if (primary && typeof primary === 'object') return primary;
+
+  // Fallback if your field is named differently, e.g. 'field_arcgis'
+  const alt = rels['field_arcgis'] as RelationshipMany | undefined;
+  if (alt && typeof alt === 'object') return alt;
+
+  return undefined;
+}
+
 // Resolve ArcGIS sections preserving the original order
 export function resolveArcgisSections(
   included: IncludedArray = [],
@@ -137,7 +173,7 @@ export function resolveArcgisSections(
   const ids = rel?.data?.map((r) => r.id) ?? [];
   const byId = new Map(included.map((it) => [it.id, it]));
   const isArc = (x: IncludedItem | undefined): x is ArcgisSection =>
-    !!x && x.type.includes('paragraph--arcgis_section');
+    !!x && typeof x === 'object' && 'type' in x && String(x.type).includes('paragraph--arcgis_section');
   return ids
     .map((id) => byId.get(id))
     .filter(isArc);
