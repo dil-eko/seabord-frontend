@@ -7,6 +7,7 @@ import {
   resolveArcgisSections,
   getArcgisRelationship,
   arcgisUrlFromSection,
+  arcgisTitleFromSection,
   type ExhibitionNode,
   type IncludedArray,
 } from '@/lib/drupal';
@@ -50,7 +51,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      {/* Body HTML first: embeds (iframes) placed in the editor show up here */}
+      {/* Body HTML first: embeds (iframes) inserted in the editor show up here */}
       {html && (
         <section className="arcgis-rich mb-8">
           {/* Drupal-processed HTML. Safe because the text format already allowed your iframe. */}
@@ -63,8 +64,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <section className="mt-8">
           {sections.map((s) => {
             const url = arcgisUrlFromSection(s);
-            const stitle = s.attributes?.field_title ?? undefined;
-            return <ArcgisEmbed key={s.id} url={url} title={stitle} />;
+            if (!url) return null; // skip empty rows
+            const stitle = arcgisTitleFromSection(s);
+            return <ArcgisEmbed key={s.id} url={url} title={stitle} aspect={0.6666} />;
           })}
         </section>
       )}

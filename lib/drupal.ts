@@ -2,14 +2,14 @@
 const BASE = process.env.DRUPAL_BASE_URL!;
 const PUBLIC_BASE = process.env.NEXT_PUBLIC_DRUPAL_BASE_URL!;
 
-// If your paragraphs relationship machine name is different, change this once:
+// If your paragraphs relationship machine name changes, update this once:
 export const ARCGIS_REL = 'field_arcgis_sections';
 
-// ---- JSON:API minimal types we actually use ----
-type JsonApiIdRef = { id: string; type: string };
+// ---- JSON:API minimal types used by the app ----
+export type JsonApiIdRef = { id: string; type: string };
 
-type RelationshipSingle = { data?: JsonApiIdRef | null };
-type RelationshipMany = { data?: JsonApiIdRef[] | null };
+export type RelationshipSingle = { data?: JsonApiIdRef | null };
+export type RelationshipMany = { data?: JsonApiIdRef[] | null };
 
 interface FileResource {
   id: string;
@@ -23,34 +23,23 @@ interface MediaImage {
   relationships?: { field_media_image?: RelationshipSingle };
 }
 
-interface ArcgisSection {
+export interface ArcgisSection {
   id: string;
   type: 'paragraph--arcgis_section' | string;
   attributes?: {
-    field_title?: string | null;
-    field_type?: 'storymap' | 'experience' | (string & {}) | null;
-    // Link field may be string OR object with uri
-    field_url?: string | { uri?: string; title?: string; options?: unknown } | null;
+    field_label?: string | null;
+    // Your real URL fields (either plain string or Link field object with { uri })
+    field_storymap_url?: string | { uri?: string; title?: string; options?: unknown } | null;
+    field_experience_url?: string | { uri?: string; title?: string; options?: unknown } | null;
     field_notes?: string | null;
+    field_width?: number | string | null;
   };
-}
-
-// Extract a usable URL string from ArcgisSection (handles Link field objects)
-export function arcgisUrlFromSection(s: ArcgisSection): string {
-  const val = s.attributes?.field_url as unknown;
-  let raw = '';
-  if (typeof val === 'string') raw = val;
-  else if (val && typeof val === 'object' && 'uri' in (val as Record<string, unknown>)) {
-    const obj = val as { uri?: string };
-    raw = obj.uri || '';
-  }
-  return raw ?? '';
 }
 
 type IncludedItem = MediaImage | FileResource | ArcgisSection;
 export type IncludedArray = IncludedItem[];
 
-interface ExhibitionAttributes {
+export interface ExhibitionAttributes {
   title: string;
   field_slug?: string | null;
   field_brief?: string | null;
@@ -64,6 +53,7 @@ export interface ExhibitionNode {
   id: string;
   type: string; // "node--exhibition"
   attributes: ExhibitionAttributes;
+  // Keep relationships generic; we pick the ones we need by key
   relationships?: Record<string, RelationshipSingle | RelationshipMany | undefined>;
 }
 
@@ -72,10 +62,10 @@ interface ExhibitionsResponse {
   included?: IncludedArray;
 }
 
-// Generic fetch with ISR
+// ---- Fetch helpers with ISR ----
 async function api<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { next: { revalidate: 600 } });
-  if (!res.ok) throw new Error(`JSON:API failed ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`JSON:API ${res.status}: ${await res.text()}`);
   return (await res.json()) as T;
 }
 
@@ -128,6 +118,8 @@ export async function fetchExhibitionDetailBySlug(
   return api<ExhibitionsResponse>(`/jsonapi/node/exhibition${qs}`);
 }
 
+// ---- Resolvers ----
+
 // Resolve image file URL from media/file include chain
 export function fileUrl(
   included: IncludedArray = [],
@@ -150,19 +142,17 @@ export function fileUrl(
   return null;
 }
 
-// Pick the ArcGIS relationship from node.relationships (supports a fallback name)
+// Pick the ArcGIS relationship from node.relationships
 export function getArcgisRelationship(
   node: ExhibitionNode
 ): RelationshipMany | undefined {
   const rels = node.relationships || {};
   const primary = rels[ARCGIS_REL] as RelationshipMany | undefined;
-  if (primary && typeof primary === 'object') return primary;
+  if (primary) return primary;
 
-  // Fallback if your field is named differently, e.g. 'field_arcgis'
+  // Fallback if someone renamed it (rare)
   const alt = rels['field_arcgis'] as RelationshipMany | undefined;
-  if (alt && typeof alt === 'object') return alt;
-
-  return undefined;
+  return alt;
 }
 
 // Resolve ArcGIS sections preserving the original order
@@ -179,5 +169,25 @@ export function resolveArcgisSections(
     .filter(isArc);
 }
 
-// Re-export types
-export type { ExhibitionsResponse, ArcgisSection, ExhibitionAttributes, JsonApiIdRef };
+// ---- Paragraph helpers (match your real field names) ----
+function pickLinkValue(val: unknown): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object' && 'uri' in (val as Record<string, unknown>)) {
+    const uri = (val as { uri?: string }).uri;
+    if (typeof uri === 'string') return uri;
+  }
+  return '';
+}
+
+export function arcgisUrlFromSection(s: ArcgisSection): string {
+  const story = pickLinkValue(s.attributes?.field_storymap_url);
+  const exp = pickLinkValue(s.attributes?.field_experience_url);
+  return story || exp || '';
+}
+
+export function arcgisTitleFromSection(s: ArcgisSection): string | undefined {
+  return s.attributes?.field_label ?? undefined;
+}
+
+export type { ExhibitionsResponse };

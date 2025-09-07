@@ -13,7 +13,7 @@ function isAllowedHost(url: string): boolean {
   }
 }
 
-// If user pasted full <iframe ... src="..."> code, extract the src URL
+// If a full <iframe ... src="..."> was pasted, extract the src URL
 function extractUrl(input: string): string {
   if (!input) return '';
   const raw = input.trim();
@@ -24,7 +24,7 @@ function extractUrl(input: string): string {
   return raw;
 }
 
-// Force https
+// Force https protocol
 function toHttps(u: string): string {
   if (!u) return '';
   try {
@@ -41,13 +41,15 @@ function toHttps(u: string): string {
 export default function ArcgisEmbed({
   url,
   title,
+  aspect = 0.5625, // 16:9 by default (56.25%). Use 0.6666 (3:2) or 0.75 (4:3) for taller maps.
 }: {
   url: string;
   title?: string;
+  aspect?: number;
 }) {
   const normalized = toHttps(extractUrl(url));
 
-  if (!isAllowedHost(normalized)) {
+  if (!normalized || !isAllowedHost(normalized)) {
     return (
       <p className="text-sm">
         Invalid or disallowed ArcGIS URL.{' '}
@@ -67,13 +69,14 @@ export default function ArcgisEmbed({
     );
   }
 
-  // Responsive 16:9; increase paddingTop to 66.66% or 75% for a taller map
+  const paddingTop = `${aspect * 100}%`;
+
   return (
     <div className="my-6">
       {title && <h3 className="text-base font-medium mb-2">{title}</h3>}
       <div
         className="relative w-full rounded-xl overflow-hidden border"
-        style={{ paddingTop: '56.25%' }} // 16:9
+        style={{ paddingTop }}
       >
         <iframe
           src={normalized}
