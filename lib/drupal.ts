@@ -26,11 +26,21 @@ interface ArcgisSection {
   attributes?: {
     field_title?: string | null;
     field_type?: 'storymap' | 'experience' | (string & {}) | null;
-    field_url?: string | null;
+    field_url?: string | { uri?: string; title?: string; options?: unknown } | null;
     field_notes?: string | null;
   };
 }
 
+// Extract a usable URL string from ArcgisSection (handles Link field objects)
+export function arcgisUrlFromSection(s: ArcgisSection): string {
+  const val = s.attributes?.field_url as unknown;
+  let raw = '';
+  if (typeof val === 'string') raw = val;
+  else if (val && typeof val === 'object' && 'uri' in val && typeof (val as any).uri === 'string') {
+    raw = (val as any).uri;
+  }
+  return raw ?? '';
+}
 type IncludedItem = MediaImage | FileResource | ArcgisSection;
 export type IncludedArray = IncludedItem[];
 

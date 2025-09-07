@@ -5,6 +5,7 @@ import {
   fetchExhibitionDetailBySlug,
   fileUrl,
   resolveArcgisSections,
+  arcgisUrlFromSection,
   type ExhibitionNode,
   type IncludedArray,
 } from '@/lib/drupal';
@@ -42,7 +43,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       {sections.length > 0 ? (
         <section>
           {sections.map((s) => {
-            const url = s.attributes?.field_url ?? '';
+            const url = arcgisUrlFromSection(s);
             const stitle = s.attributes?.field_title ?? undefined;
             return <ArcgisEmbed key={s.id} url={url} title={stitle} />;
           })}
