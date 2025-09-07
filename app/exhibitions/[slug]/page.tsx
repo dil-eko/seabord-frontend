@@ -8,6 +8,7 @@ import {
   getArcgisRelationship,
   arcgisUrlFromSection,
   arcgisTitleFromSection,
+  type RelationshipSingle,     // ← added
   type ExhibitionNode,
   type IncludedArray,
 } from '@/lib/drupal';
@@ -21,7 +22,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   const included: IncludedArray = json.included ?? [];
   const title = node.attributes.title ?? 'Untitled';
-  const hero = fileUrl(included, node.relationships?.['field_hero'] as any);
+
+  // Narrow the dynamic relationship access to the expected type:
+  const heroRel = node.relationships?.['field_hero'] as RelationshipSingle | undefined;
+  const hero = fileUrl(included, heroRel);
+
   const arcgisRel = getArcgisRelationship(node);
   const sections = resolveArcgisSections(included, arcgisRel);
 
