@@ -1,11 +1,12 @@
-// Server-side base URL (never exposed to the browser)
+// Server-side base URL
 const BASE = process.env.DRUPAL_BASE_URL!;
-// Public base (for client-side helpers if needed)
 const PUBLIC_BASE = process.env.NEXT_PUBLIC_DRUPAL_BASE_URL!;
 
-// ---- Minimal JSON:API types we actually use ----
+// ---- JSON:API minimal types ----
 type JsonApiIdRef = { id: string; type: string };
+
 type RelationshipSingle = { data?: JsonApiIdRef | null };
+type RelationshipMany = { data?: JsonApiIdRef[] | null };
 
 interface FileResource {
   id: string;
@@ -19,8 +20,19 @@ interface MediaImage {
   relationships?: { field_media_image?: RelationshipSingle };
 }
 
-type IncludedItem = MediaImage | FileResource;
-type IncludedArray = IncludedItem[];
+interface ArcgisSection {
+  id: string;
+  type: 'paragraph--arcgis_section' | string;
+  attributes?: {
+    field_title?: string | null;
+    field_type?: 'storymap' | 'experience' | (string & {}) | null;
+    field_url?: string | null;
+    field_notes?: string | null;
+  };
+}
+
+type IncludedItem = MediaImage | FileResource | ArcgisSection;
+export type IncludedArray = IncludedItem[];
 
 interface ExhibitionAttributes {
   title: string;
@@ -29,13 +41,14 @@ interface ExhibitionAttributes {
   path?: { alias?: string | null };
 }
 
-interface ExhibitionNode {
+export interface ExhibitionNode {
   id: string;
-  type: string; // e.g. "node--exhibition"
+  type: string; // "node--exhibition"
   attributes: ExhibitionAttributes;
   relationships?: {
     field_thumbnail?: RelationshipSingle;
     field_hero?: RelationshipSingle;
+    field_arcgis_sections?: RelationshipMany;
   };
 }
 
@@ -44,24 +57,15 @@ interface ExhibitionsResponse {
   included?: IncludedArray;
 }
 
-// Generic JSON fetcher with ISR
+// Generic fetch with ISR
 async function api<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { next: { revalidate: 600 } });
-  if (!res.ok) {
-    throw new Error(`JSON:API failed ${res.status}: ${await res.text()}`);
-  }
+  if (!res.ok) throw new Error(`JSON:API failed ${res.status}: ${await res.text()}`);
   return (await res.json()) as T;
 }
 
 export async function fetchExhibitions(): Promise<ExhibitionsResponse> {
-  const fields = [
-    'title',
-    'field_slug',
-    'path',
-    'field_brief',
-    'field_thumbnail',
-    'field_hero',
-  ];
+  const fields = ['title', 'field_slug', 'path', 'field_brief', 'field_thumbnail', 'field_hero'];
   const include = [
     'field_thumbnail',
     'field_thumbnail.field_media_image',
@@ -76,21 +80,36 @@ export async function fetchExhibitions(): Promise<ExhibitionsResponse> {
   return api<ExhibitionsResponse>(`/jsonapi/node/exhibition${qs}`);
 }
 
-// Resolve the file URL from included media->file chain.
+export async function fetchExhibitionDetailBySlug(
+  slug: string
+): Promise<ExhibitionsResponse> {
+  const include = [
+    'field_hero',
+    'field_hero.field_media_image',
+    'field_thumbnail',
+    'field_thumbnail.field_media_image',
+    'field_arcgis_sections',
+  ];
+  const qs =
+    `?filter[field_slug][value]=${encodeURIComponent(slug)}` +
+    `&filter[status]=1&page[limit]=1` +
+    `&include=${include.join(',')}`;
+  return api<ExhibitionsResponse>(`/jsonapi/node/exhibition${qs}`);
+}
+
+// Resolve image file URL from media/file include chain
 export function fileUrl(
   included: IncludedArray = [],
   rel?: RelationshipSingle
 ): string | null {
   const id = rel?.data?.id;
   if (!id) return null;
-
   const media = included.find((x) => x.id === id);
-  // Find nested file from media->field_media_image
   if (media && 'relationships' in media) {
     const fileRef = media.relationships?.field_media_image?.data?.id;
     if (fileRef) {
-      const file = included.find((x) => x.id === fileRef);
-      const url = (file as FileResource | undefined)?.attributes?.uri?.url;
+      const file = included.find((x) => x.id === fileRef) as FileResource | undefined;
+      const url = file?.attributes?.uri?.url;
       if (url) {
         const base = process.env.DRUPAL_BASE_URL || PUBLIC_BASE;
         return `${base}${url}`;
@@ -99,4 +118,20 @@ export function fileUrl(
   }
   return null;
 }
-export type { ExhibitionNode, IncludedArray };
+
+// Resolve ArcGIS sections preserving the original order
+export function resolveArcgisSections(
+  included: IncludedArray = [],
+  rel?: RelationshipMany
+): ArcgisSection[] {
+  const ids = rel?.data?.map((r) => r.id) ?? [];
+  const byId = new Map(included.map((it) => [it.id, it]));
+  const isArc = (x: IncludedItem | undefined): x is ArcgisSection =>
+    !!x && x.type.includes('paragraph--arcgis_section');
+  return ids
+    .map((id) => byId.get(id))
+    .filter(isArc);
+}
+
+// Re-export types
+export type { ExhibitionsResponse, ArcgisSection, ExhibitionAttributes, JsonApiIdRef };
