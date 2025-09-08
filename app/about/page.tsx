@@ -1,9 +1,10 @@
-// app/about/page.tsx
+import Link from "next/link";
+
 export const revalidate = 600;
 
 export default function Page() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-semibold mb-4">About</h1>
       <p className="mb-4">
         Seabord explores the fortifications of the Eastern Mediterranean through
@@ -17,10 +18,11 @@ export default function Page() {
         and military architectures across the region.
       </p>
       <p>
-        You can browse <a className="underline" href="/exhibitions">Exhibitions</a>,
-        read <a className="underline" href="/articles">Articles</a>, or explore
-        <a className="underline" href="/fortresses"> Fortresses</a>.
+        You can browse{" "}
+        <Link className="underline" href="/exhibitions">Exhibitions</Link>, read{" "}
+        <Link className="underline" href="/articles">Articles</Link>, or explore
+        <Link className="underline" href="/fortresses"> Fortresses</Link>.
       </p>
-    </main>
+    </div>
   );
 }
