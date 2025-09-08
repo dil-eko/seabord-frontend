@@ -3,7 +3,7 @@ export const revalidate = 600;
 
 export default function Page() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-semibold mb-4">Project: Seabord</h1>
       <p className="mb-4">
         <strong>Seabord</strong> is an ongoing research initiative focused on the
@@ -20,6 +20,6 @@ export default function Page() {
         For collaboration or sponsorship opportunities, please visit the{" "}
         <a className="underline" href="/contact">Contact</a> page.
       </p>
-    </main>
+    </div>
   );
 }

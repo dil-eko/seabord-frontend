@@ -23,6 +23,7 @@ type IncludedItem = FileResource | MediaImage;
 type IncludedArray = IncludedItem[];
 
 interface FortressAttributes {
+  body: any;
   title?: string | null;
   field_slug?: string | null;
   field_brief?: string | null;
@@ -78,6 +79,9 @@ async function fetchFortresses(): Promise<FortressesResponse> {
     "title",
     "field_slug",
     "path",
+    "body",
+    "field_image",
+    "field_hero",
     "field_brief",
     "field_thumbnail", // media
   ];
@@ -103,7 +107,7 @@ export default async function Page() {
   const inc: IncludedArray = included ?? [];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-12">
+    <div className="max-w-7xl mx-auto px-4 py-12">
       <h1 className="text-2xl font-semibold mb-6">Fortresses</h1>
 
       {nodes.length === 0 ? (
@@ -114,8 +118,9 @@ export default async function Page() {
             const img = fileUrl(inc, n.relationships?.["field_thumbnail"]);
             const title = n.attributes.title ?? "Untitled";
             const slug = n.attributes.field_slug ?? undefined;
-            const href = slug ? `/fortresses/${slug}` : (n.attributes.path?.alias ?? "#");
-            const brief = n.attributes.field_brief ?? "";
+            const alias = n.attributes.path?.alias ?? null;
+            const href = alias ?? (slug ? `/fortresses/${slug}` : '#');
+            const brief = n.attributes.field_brief ?? n.attributes.body?.summary ?? '';
 
             return (
               <Link
@@ -142,6 +147,6 @@ export default async function Page() {
           })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

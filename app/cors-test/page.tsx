@@ -30,7 +30,7 @@ export default function CorsTestPage() {
   }, []);
 
   return (
-    <main className="p-6">
+    <div className="p-6">
       <h1 className="text-xl font-semibold mb-4">CORS Test</h1>
       {error && <p className="text-red-600">Error: {error}</p>}
       {!error && !titles.length && <p>Loading…</p>}
@@ -42,6 +42,6 @@ export default function CorsTestPage() {
       <p className="text-xs text-gray-500 mt-4">
         If you see titles here and no CORS error in DevTools → CORS is OK.
       </p>
-    </main>
+    </div>
   );
 }

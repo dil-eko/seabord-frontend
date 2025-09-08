@@ -2,4 +2,10 @@ const config = {
   plugins: ["@tailwindcss/postcss"],
 };
 
-export default config;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: 'dev-seabord.pantheonsite.io', pathname: '/**' }],
+  },
+};
+export default nextConfig;
