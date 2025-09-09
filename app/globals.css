@@ -23,12 +23,12 @@
 /* Işık/Koyu tema için renk değişkenleri */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #171717; --link:#0b66c3;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #e6e6e6; --link:#93c5fd;
   }
 }
 
@@ -40,6 +40,11 @@
   /* Bu iki değişkeni gerçekten tanımlıyorsan kullan; yoksa yorumla veya kaldır. */
   /* --font-sans: var(--font-geist-sans);
      --font-mono: var(--font-geist-mono); */
+}
+a { color: var(--link); }
+.prose :where(h1,h2,h3,h4,strong,b){ color: var(--foreground); }
+.prose :where(p,li,blockquote){
+  color: color-mix(in oklab, var(--foreground) 90%, transparent);
 }
 
 /* ÖNEMLİ: body’ye burada background/color vermiyoruz.

@@ -1,7 +1,7 @@
 // app/layout.tsx
+import "@/app/globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import "./globals.css";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

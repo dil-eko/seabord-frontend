@@ -169,7 +169,7 @@ export default async function Page() {
       <h1 className="text-2xl font-semibold mb-6">Articles</h1>
 
       {nodes.length === 0 ? (
-        <p className="text-gray-600">No articles yet.</p>
+        <p className="text-foregound/70">No articles yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {nodes.map((n) => {

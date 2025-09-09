@@ -201,7 +201,7 @@ export default async function Page({
               <div dangerouslySetInnerHTML={{ __html: html }} />
             </section>
           ) : (
-            <p className="text-gray-600">No content.</p>
+            <p className="text-foreground/70">No content.</p>
           )}
         </article>
 

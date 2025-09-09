@@ -11,7 +11,7 @@ export default function Page() {
         <h1 className="text-2xl font-semibold">
           Seabord — a digital gaze to the fortresses of eastern mediterranean.
         </h1>
-        <p className="text-gray-600 mt-3 max-w-2xl">
+        <p className="text-foreground/80 mt-3 max-w-2xl">
           Explore exhibitions that embed ArcGIS StoryMaps, read articles, and browse fortress records.
         </p>
       </section>
@@ -23,7 +23,7 @@ export default function Page() {
               </div>
              <div className="p-4">
                <h2 className="font-semibold group-hover:underline">Exhibitions</h2>
-               <p className="text-sm text-zinc-600 mt-1">Curated narratives & maps</p>
+               <p className="text-sm text-foreground/70 mt-1">Curated narratives & maps</p>
              </div>
             </Link>
 
@@ -33,7 +33,7 @@ export default function Page() {
              </div>
              <div className="p-4">
                  <h2 className="font-semibold group-hover:underline">Fortresses</h2>
-                 <p className="text-sm text-zinc-600 mt-1">Catalog of sites & facts</p>
+                 <p className="text-sm text-foreground/70 mt-1">Catalog of sites & facts</p>
              </div>
             </Link>
 
@@ -43,7 +43,7 @@ export default function Page() {
              </div>
              <div className="p-4">
                 <h2 className="font-semibold group-hover:underline">Articles</h2>
-                 <p className="text-sm text-zinc-600 mt-1">Long-form essays</p>
+                 <p className="text-sm text-foreground/70 mt-1">Long-form essays</p>
               </div>
             </Link>
           </section>

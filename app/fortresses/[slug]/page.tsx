@@ -271,7 +271,7 @@ export default async function Page({
       {/* Main content */}
       <div className="col-span-12 lg:col-span-8">
         <h1 className="text-3xl font-semibold mb-2">{title}</h1>
-        {brief && <p className="text-zinc-600 mb-4">{brief}</p>}
+        {brief && <p className="text-foreground/70 mb-4">{brief}</p>}
 
         {heroUrl && (
           <Figure
