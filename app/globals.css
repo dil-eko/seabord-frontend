@@ -46,6 +46,11 @@ a { color: var(--link); }
 .prose :where(p,li,blockquote){
   color: color-mix(in oklab, var(--foreground) 90%, transparent);
 }
-
+/* Brand logo switch */
+.brand-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .brand-light { display: none; }
+  .brand-dark { display: inline-block; }
+}
 /* ÖNEMLİ: body’ye burada background/color vermiyoruz.
    Renk ve font Tailwind sınıflarıyla layout’ta ayarlanacak. */
