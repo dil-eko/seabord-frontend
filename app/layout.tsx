@@ -120,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       rel="noreferrer"
                       className="hover:underline"
                     >
-                      Seabırd Project
+                      Seabord Project
                     </a>
                   <span className="mx-2 text-gray-400">•</span>
                   <a
