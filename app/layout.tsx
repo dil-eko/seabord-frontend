@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </li>
                 <li>
                   <a className="hover:underline" href="https://seabord.cyi.ac.cy" target="_blank" rel="noreferrer">
-                    The Cyprus Institute
+                    The Cyprus Institute--
                     </a>
                   <a className="hover:underline" href="https://apaclabs.cyi.ac.cy/news/seaboard-project" target="_blank" rel="noreferrer">
                     Apac Labaroties
