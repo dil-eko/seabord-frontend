@@ -21,8 +21,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/" className="flex items-center gap-2" aria-label="Seabord home">
               <span className="sr-only">Seabord</span>
               {/* light/dark wordmark swap */}
-              <img src="/brand/seabord-wordmark-light.png" alt="" className="h-22 w-auto brand-light" />
-              <img src="/brand/seabord-wordmark-dark.png" alt="" className="h-22 w-auto brand-dark" />
+              <img src="/brand/seabord-wordmark-light.png" alt="" className="h-18 w-auto brand-light" />
+              <img src="/brand/seabord-wordmark-dark.png" alt="" className="h-18 w-auto brand-dark" />
             </Link>
             <div className="flex items-center gap-4">
               <Link className="text-sm hover:underline underline-offset-4" href="/">Home</Link>
