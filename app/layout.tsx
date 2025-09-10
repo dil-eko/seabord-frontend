@@ -77,24 +77,65 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <footer className="border-t mt-12">
           <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-sm">
             <section>
-              <h2 className="text-xs font-semibold tracking-wide uppercase text-gray-600 mb-3">Sponsors</h2>
-              <ul className="space-y-2">
-                <li>
-                  <a className="hover:underline" href="https://cordis.europa.eu/project/id/101110752/en" target="_blank" rel="noreferrer">
-                    Marie Skłodowska-Curie Actions
-                  </a>
-                </li>
-                <li>
-                  <a className="hover:underline" href="https://seabord.cyi.ac.cy" target="_blank" rel="noreferrer">
-                    The Cyprus Institute--
-                    </a>
-                  <a className="hover:underline" href="https://apaclabs.cyi.ac.cy/news/seaboard-project" target="_blank" rel="noreferrer">
-                    Apac Labaroties
-                  </a>
-                </li>
-              </ul>
-            </section>
+              <h2 className="text-xs font-semibold tracking-wide uppercase text-gray-600 mb-3">
+                Sponsors
+              </h2>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+                 {/* 1) Marie Skłodowska-Curie Actions (CORDIS proje sayfası) */}
+                <a
+                  href="https://cordis.europa.eu/project/id/101110752/en"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex flex-col items-start gap-2"
+                >
+                 <img
+                    src="/logos/msca.svg"  /* PNG’niz varsa uzantıyı değiştirin */
+                    alt="Marie Skłodowska-Curie Actions (Project 101110752)"
+                    className="h-8 w-auto dark:opacity-90"
+                  />
+                  <span className="text-xs text-gray-600 group-hover:underline">
+                    Marie Skłodowska-Curie Actions
+                  </span>
+                </a>
+
+                  {/* 2) The Cyprus Institute (logo + altında başlık ve APAC Labs linki) */}
+                <div className="flex flex-col items-start gap-2">
+                  <a
+                    href="https://seabord.cyi.ac.cy"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center"
+                  >
+                    <img
+                      src="/logos/cyprus-institute.svg" /* PNG ise uzantıyı değiştirin */
+                      alt="The Cyprus Institute"
+                      className="h-8 w-auto dark:opacity-90"
+                    />
+                  </a>
+                  <div className="text-xs">
+                    <a
+                      href="https://seabord.cyi.ac.cy"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:underline"
+                    >
+                      The Cyprus Institute
+                    </a>
+                  <span className="mx-2 text-gray-400">•</span>
+                  <a
+                      href="https://apaclabs.cyi.ac.cy/news/seaboard-project"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:underline"
+                  >
+                      APAC Labs — Seabord project
+                  </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+            
             <section>
               <h2 className="text-xs font-semibold tracking-wide uppercase text-foreground/70 mb-3">Quick Links</h2>
               <ul className="space-y-2">
