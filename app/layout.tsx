@@ -2,6 +2,39 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import type { Metadata, Viewport } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Seabord",
+    template: "%s | Seabord",
+  },
+  description: "a digital gaze to the fortresses of eastern mediterranean.",
+  metadataBase: new URL("https://seabord-frontend.vercel.app"), // kendi domaininiz
+  openGraph: {
+    type: "website",
+    siteName: "Seabord",
+    url: "/",
+    title: "Seabord",
+    description: "a digital gaze to the fortresses of eastern mediterranean.",
+    images: [
+      { url: "/og-seabord-light.png", width: 1200, height: 630, alt: "Seabord" },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-seabord-light.png"],
+  },
+  icons: { icon: "/favicon.ico" },
+};
+
+// (opsiyonel) tarayıcı adres çubuğu rengi / dark-light için
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0a0a0a"  },
+  ],
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -83,7 +116,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="border-t">
             <div className="max-w-7xl mx-auto px-4 py-6 text-xs text-foreground/70 flex items-center justify-between">
               <span>© {new Date().getFullYear()} Seabord</span>
-              <span>This website is created as part of a MSCA PF project (2023-2025), which has received funding from the European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie grant agreement: 101110752</span>
+              <span> This website is created as part of a MSCA PF project (2023-2025), which has received funding from the European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie grant agreement: 101110752</span>
             </div>
           </div>
         </footer>
