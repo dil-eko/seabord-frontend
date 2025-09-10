@@ -120,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       rel="noreferrer"
                       className="hover:underline"
                     >
-                      The Cyprus Institute
+                      Seabırd Project
                     </a>
                   <span className="mx-2 text-gray-400">•</span>
                   <a
@@ -129,7 +129,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       rel="noreferrer"
                       className="hover:underline"
                   >
-                      APAC Labs — Seabord project
+                      APAC Labs
                   </a>
                   </div>
                 </div>
