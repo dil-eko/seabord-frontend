@@ -25,12 +25,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <img src="/brand/seabord-wordmark-dark.png" alt="" className="h-18 w-auto brand-dark" />
             </Link>
             <div className="flex items-center gap-4">
-              <Link className="text-sm hover:underline underline-offset-4" href="/">Home</Link>
-              <Link className="text-sm hover:underline underline-offset-4" href="/about">About</Link>
-              <Link className="text-sm hover:underline underline-offset-4" href="/articles">Articles</Link>
-              <Link className="text-sm hover:underline underline-offset-4" href="/fortresses">Fortresses</Link>
-              <Link className="text-sm hover:underline underline-offset-4" href="/exhibitions">Exhibitions</Link>
-              <Link className="text-sm hover:underline underline-offset-4" href="/project-seabord">Project: Seabord</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/">Home</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/about">About</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/articles">Articles</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/fortresses">Fortresses</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/exhibitions">Exhibitions</Link>
+              <Link className="text-base hover:underline underline-offset-4 font-semibold" href="/project-seabord">Project: Seabord</Link>
             </div>
           </nav>
         </header>
