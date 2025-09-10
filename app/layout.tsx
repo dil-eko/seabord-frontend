@@ -165,14 +165,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   loading="lazy"
                   decoding="async"
                  />
-                  <span>© {new Date().getFullYear()} Seabord</span>
-                </div>
-
                   <p className="leading-relaxed text-foreground/70">
                     This website is created as part of a MSCA PF project (2023–2025), which has received funding from the
                     European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie
                     grant agreement: <span className="font-medium">101110752</span>.
                   </p>
+                  <span>© {new Date().getFullYear()} Seabord</span>
+                </div>
                 </div>{/* /.max-w-7xl */}
               </div>{/* /.border-t */}
             </footer>
