@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="border-t">
             <div className="max-w-7xl mx-auto px-4 py-6 text-xs text-foreground/70 flex items-center justify-between">
               <span>© {new Date().getFullYear()} Seabord</span>
-              <span>a digital gaze to the fortresses of eastern mediterranean.</span>
+              <span>This website is created as part of a MSCA PF project (2023-2025), which has received funding from the European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie grant agreement: 101110752</span>
             </div>
           </div>
         </footer>
