@@ -159,7 +159,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                <div className="flex items-center gap-3">
                  {/* EU-funded / MSCA logo */}
                  <img
-                  src="/logos/msca.svg"
+                  src="/logos/funded-EU.svg"
                   alt="EU-funded — Marie Skłodowska-Curie Actions (Grant 101110752)"
                   className="h-8 w-auto dark:opacity-90"
                   loading="lazy"
