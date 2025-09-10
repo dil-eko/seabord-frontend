@@ -155,13 +155,28 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="border-t">
-            <div className="max-w-7xl mx-auto px-4 py-6 text-xs text-foreground/70 flex items-center justify-between">
-              <span>© {new Date().getFullYear()} Seabord</span>
-              <span> This website is created as part of a MSCA PF project (2023-2025), which has received funding from the European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie grant agreement: 101110752</span>
-            </div>
-          </div>
-        </footer>
-      </body>
-    </html>
-  );
+            <div className="max-w-7xl mx-auto px-4 py-6 text-xs text-foreground/70 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+               <div className="flex items-center gap-3">
+                 {/* EU-funded / MSCA logo */}
+                 <img
+                  src="/logos/msca.svg"
+                  alt="EU-funded — Marie Skłodowska-Curie Actions (Grant 101110752)"
+                  className="h-8 w-auto dark:opacity-90"
+                  loading="lazy"
+                  decoding="async"
+                 />
+                  <span>© {new Date().getFullYear()} Seabord</span>
+                </div>
+
+                  <p className="leading-relaxed text-foreground/70">
+                    This website is created as part of a MSCA PF project (2023–2025), which has received funding from the
+                    European Union’s Horizon Europe research and innovation programme under the Marie Sklodowska-Curie
+                    grant agreement: <span className="font-medium">101110752</span>.
+                  </p>
+                </div>{/* /.max-w-7xl */}
+              </div>{/* /.border-t */}
+            </footer>
+          </body>
+        </html>
+      );
 }
