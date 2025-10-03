@@ -3,6 +3,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Metadata, Viewport } from "next";
+import CookieBanner from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: {
@@ -47,7 +48,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           Skip to content
         </a>
+ <header>
+          {/* header content */}
+        </header>
 
+        <main id="main">
+          {children}
+        </main>
+
+        <footer>
+          {/* footer content */}
+        </footer>
+
+        {/* ✅ GDPR Cookie Banner */}
+        <CookieBanner />
         {/* Header */}
         <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b">
           <nav className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-6">
@@ -82,7 +96,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
-                 {/* 1) Marie Skłodowska-Curie Actions (CORDIS proje sayfası) */}
+                 {/* 1) Marie Skłodowska-Curie Actions (CORDIS) */}
                 <a
                   href="https://cordis.europa.eu/project/id/101110752/en"
                   target="_blank"
@@ -90,7 +104,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   className="group flex flex-col items-start gap-2"
                 >
                  <img
-                    src="/logos/msca.svg"  /* PNG’niz varsa uzantıyı değiştirin */
+                    src="/logos/msca.svg" 
                     alt="Marie Skłodowska-Curie Actions (Project 101110752)"
                     className="h-8 w-auto dark:opacity-90"
                   />
@@ -99,7 +113,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </span>
                 </a>
 
-                  {/* 2) The Cyprus Institute (logo + altında başlık ve APAC Labs linki) */}
+                  {/* 2) The Cyprus Institute (logo + APAC Labs) */}
                 <div className="flex flex-col items-start gap-2">
                   <a
                     href="https://seabord.cyi.ac.cy"
@@ -108,7 +122,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     className="flex items-center"
                   >
                     <img
-                      src="/logos/cyprus-institute.svg" /* PNG ise uzantıyı değiştirin */
+                      src="/logos/cyprus-institute.svg" 
                       alt="The Cyprus Institute"
                       className="h-8 w-auto dark:opacity-90"
                     />
