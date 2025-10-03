@@ -150,6 +150,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <p className="mb-2">For inquiries and collaboration:</p>
               <ul className="space-y-2">
                 <li><Link className="hover:underline" href="/contact">Contact form</Link></li>
+                <li><Link className="hover:underline" href="/privacy policy">Privacy Policy</Link></li>
               </ul>
             </section>
           </div>
