@@ -238,7 +238,7 @@ export default async function Page({
   const sections = resolveArcgisSections(included, arcRel);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="w-full mx-auto px-0 py-10">
       <h1 className="text-xl font-semibold mb-4">{title}</h1>
 
       {hero && (
