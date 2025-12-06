@@ -1,11 +1,9 @@
 // app/exhibitions/[slug]/page.tsx
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import ResponsiveIframe from "@/components/ResponsiveIframe";
 
 export const revalidate = 600;
 
-/* ---------- Minimal JSON:API types (local) ---------- */
 type JsonApiIdRef = { id: string; type: string };
 type RelationshipSingle = { data?: JsonApiIdRef | null };
 type RelationshipMany = { data?: JsonApiIdRef[] | null };
@@ -30,7 +28,7 @@ interface ArcgisSection {
     field_storymap_url?: string | { uri?: string; title?: string } | null;
     field_experience_url?: string | { uri?: string; title?: string } | null;
     field_notes?: string | null;
-    field_width?: number | string | null; // şimdilik kullanmıyoruz
+    field_width?: number | string | null;
   };
 }
 
@@ -48,7 +46,7 @@ interface ExhibitionAttributes {
 
 interface ExhibitionNode {
   id: string;
-  type: string; // node--exhibition
+  type: string;
   attributes: ExhibitionAttributes;
   relationships?: Record<string, RelationshipSingle | RelationshipMany | undefined>;
 }
@@ -58,7 +56,6 @@ interface ExhibitionsResponse {
   included?: IncludedArray;
 }
 
-/* ---------- Safe helpers (no-any) ---------- */
 function getType(x?: IncludedItem): string | null {
   if (!x) return null;
   const t = (x as { type?: unknown }).type;
@@ -77,7 +74,6 @@ function isArcgis(x?: IncludedItem): x is ArcgisSection {
   return !!t && t.includes("paragraph--arcgis_section");
 }
 
-/* ---------- Media URL resolver ---------- */
 function fileUrl(included: IncludedArray = [], rel?: RelationshipSingle): string | null {
   const base = process.env.DRUPAL_BASE_URL || process.env.NEXT_PUBLIC_DRUPAL_BASE_URL || "";
   const id = rel?.data?.id;
@@ -101,7 +97,6 @@ function fileUrl(included: IncludedArray = [], rel?: RelationshipSingle): string
   return null;
 }
 
-/* ---------- ArcGIS helpers ---------- */
 function pickLink(v: unknown): string {
   if (!v) return "";
   if (typeof v === "string") return v;
@@ -118,19 +113,13 @@ function normalizeArcgisUrl(raw?: string | null): string | null {
     const u = new URL(raw);
     const host = u.hostname.toLowerCase();
 
-    // Esri StoryMaps: https://storymaps.arcgis.com/stories/{id}
-    if (host.endsWith("storymaps.arcgis.com")) {
-      if (u.pathname.startsWith("/stories/")) {
-        // Daha temiz embed
-        u.searchParams.set("embed", "true");
-        u.searchParams.set("header", "false");
-      }
+    if (host.endsWith("storymaps.arcgis.com") && u.pathname.startsWith("/stories/")) {
+      u.searchParams.set("embed", "true");
+      u.searchParams.set("header", "false");
       return u.toString();
     }
 
-    // Experience Builder: https://experience.arcgis.com/experience/{id}
     if (host.endsWith("experience.arcgis.com")) {
-      // Bazı temalarda embed parametreleri opsiyonel; bozmayalım
       return u.toString();
     }
 
@@ -177,7 +166,6 @@ function resolveArcgisSections(included: IncludedArray = [], rel?: RelationshipM
   return ids.map((id) => byId.get(id)).filter(isArcgis);
 }
 
-/* ---------- Server fetcher ---------- */
 async function fetchExhibitionDetailBySlug(slug: string): Promise<ExhibitionsResponse> {
   const BASE = process.env.DRUPAL_BASE_URL!;
   const fields = [
@@ -209,11 +197,43 @@ async function fetchExhibitionDetailBySlug(slug: string): Promise<ExhibitionsRes
   return (await res.json()) as ExhibitionsResponse;
 }
 
-/* ---------- Page ---------- */
+function ratioPadding(aspect: string): string {
+  const [wRaw, hRaw] = aspect.split("/");
+  const w = Number(wRaw);
+  const h = Number(hRaw);
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return "56.25%";
+  return `${(h / w) * 100}%`;
+}
+
+function ResponsiveIframe({
+  src,
+  title,
+  aspect = "16/9",
+  minVH = 70,
+}: {
+  src: string;
+  title: string;
+  aspect?: string;
+  minVH?: number;
+}) {
+  return (
+    <div className="relative w-full bg-black" style={{ paddingTop: ratioPadding(aspect), minHeight: `${minVH}vh` }}>
+      <iframe
+        className="absolute inset-0 h-full w-full"
+        src={src}
+        title={title}
+        loading="lazy"
+        allowFullScreen
+        allow="fullscreen"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </div>
+  );
+}
+
 export default async function Page({
   params,
 }: {
-  // Dynamic route params are async in latest Next: await once, reuse slug
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
@@ -229,60 +249,54 @@ export default async function Page({
     fileUrl(included, node.relationships?.["field_hero"] as RelationshipSingle | undefined) ??
     fileUrl(included, node.relationships?.["field_thumbnail"] as RelationshipSingle | undefined);
 
-  const html =
-    node.attributes.body?.processed ??
-    node.attributes.field_body?.processed ??
-    null;
+  const html = node.attributes.body?.processed ?? node.attributes.field_body?.processed ?? null;
 
   const arcRel = getArcgisRel(node);
   const sections = resolveArcgisSections(included, arcRel);
 
   return (
-    <div className="w-full mx-auto px-0 py-10">
-      <h1 className="text-xl font-semibold mb-4">{title}</h1>
+    <div className="py-10">
+      <div className="max-w-3xl mx-auto px-4">
+        <h1 className="text-xl font-semibold mb-4">{title}</h1>
 
-      {hero && (
-        <div className="relative w-full rounded-xl overflow-hidden border mb-6" style={{ paddingTop: "56.25%" }}>
-          <Image src={hero} alt={title} fill sizes="(min-width:1024px) 768px, 100vw" />
-        </div>
-      )}
+        {hero && (
+          <div className="relative w-full rounded-xl overflow-hidden border mb-6" style={{ paddingTop: "56.25%" }}>
+            <Image src={hero} alt={title} fill sizes="(min-width:1024px) 768px, 100vw" />
+          </div>
+        )}
 
-      {html && (
-        <article className="prose max-w-none mb-8">
-          <div dangerouslySetInnerHTML={{ __html: html }} />
-        </article>
-      )}
+        {html && (
+          <article className="prose max-w-none mb-8">
+            <div dangerouslySetInnerHTML={{ __html: html }} />
+          </article>
+        )}
+      </div>
 
       {sections.length > 0 && (
-        <section className="space-y-6">
-          {sections.map((s) => {
-            const url = arcgisUrlFromSection(s);
-            const label = s.attributes?.field_label ?? "ArcGIS";
+        <div className="mt-10 w-full">
+          <section className="space-y-8">
+            {sections.map((s) => {
+              const url = arcgisUrlFromSection(s);
+              const label = s.attributes?.field_label ?? "ArcGIS";
 
-            return (
-              <div key={s.id} className="rounded-xl border overflow-hidden">
-                <div className="px-4 py-3 border-b">
-                  <h2 className="text-base font-medium">{label}</h2>
-                </div>
+              return (
+                <div key={s.id} className="w-full">
+                  <div className="max-w-3xl mx-auto px-4 mb-3">
+                    <h2 className="text-base font-medium">{label}</h2>
+                  </div>
 
-                <div className="p-0">
-                  {url ? (
-                    <ResponsiveIframe
-                      src={url}
-                      title={`${title} — ${label}`}
-                      aspect="16/9"
-                      minVH={70} // küçük görünme sorununu çözer
-                    />
-                  ) : (
-                    <div className="p-4 text-sm">
-                      Invalid or disallowed ArcGIS URL.
-                    </div>
-                  )}
+                  <div className="w-full border-y">
+                    {url ? (
+                      <ResponsiveIframe src={url} title={`${title} — ${label}`} aspect="16/9" minVH={80} />
+                    ) : (
+                      <div className="max-w-3xl mx-auto px-4 py-6 text-sm">Invalid or disallowed ArcGIS URL.</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </section>
+              );
+            })}
+          </section>
+        </div>
       )}
     </div>
   );
