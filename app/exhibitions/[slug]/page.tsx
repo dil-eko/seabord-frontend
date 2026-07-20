@@ -1,5 +1,4 @@
 // app/exhibitions/[slug]/page.tsx
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export const revalidate = 600;
@@ -7,18 +6,6 @@ export const revalidate = 600;
 type JsonApiIdRef = { id: string; type: string };
 type RelationshipSingle = { data?: JsonApiIdRef | null };
 type RelationshipMany = { data?: JsonApiIdRef[] | null };
-
-interface FileResource {
-  id: string;
-  type: "file--file" | string;
-  attributes?: { uri?: { url?: string } };
-}
-
-interface MediaImage {
-  id: string;
-  type: "media--image" | string;
-  relationships?: { field_media_image?: RelationshipSingle };
-}
 
 interface ArcgisSection {
   id: string;
@@ -32,15 +19,12 @@ interface ArcgisSection {
   };
 }
 
-type IncludedItem = FileResource | MediaImage | ArcgisSection;
+type IncludedItem = ArcgisSection;
 type IncludedArray = IncludedItem[];
 
 interface ExhibitionAttributes {
   title?: string | null;
   field_slug?: string | null;
-  field_brief?: string | null;
-  body?: { processed?: string | null } | null;
-  field_body?: { processed?: string | null } | null;
   path?: { alias?: string | null } | null;
 }
 
@@ -61,40 +45,9 @@ function getType(x?: IncludedItem): string | null {
   const t = (x as { type?: unknown }).type;
   return typeof t === "string" ? t : null;
 }
-function isFile(x?: IncludedItem): x is FileResource {
-  const t = getType(x);
-  return !!t && t.includes("file--file");
-}
-function isMedia(x?: IncludedItem): x is MediaImage {
-  const t = getType(x);
-  return !!t && t.includes("media--image");
-}
 function isArcgis(x?: IncludedItem): x is ArcgisSection {
   const t = getType(x);
   return !!t && t.includes("paragraph--arcgis_section");
-}
-
-function fileUrl(included: IncludedArray = [], rel?: RelationshipSingle): string | null {
-  const base = process.env.DRUPAL_BASE_URL || process.env.NEXT_PUBLIC_DRUPAL_BASE_URL || "";
-  const id = rel?.data?.id;
-  if (!id) return null;
-
-  const item = included.find((x) => x.id === id);
-  if (isFile(item)) {
-    const p = item.attributes?.uri?.url;
-    return p ? `${base}${p}` : null;
-  }
-  if (isMedia(item)) {
-    const fileRef = item.relationships?.field_media_image?.data?.id;
-    if (fileRef) {
-      const file = included.find((x) => x.id === fileRef);
-      if (isFile(file)) {
-        const p = file.attributes?.uri?.url;
-        return p ? `${base}${p}` : null;
-      }
-    }
-  }
-  return null;
 }
 
 function pickLink(v: unknown): string {
@@ -168,24 +121,8 @@ function resolveArcgisSections(included: IncludedArray = [], rel?: RelationshipM
 
 async function fetchExhibitionDetailBySlug(slug: string): Promise<ExhibitionsResponse> {
   const BASE = process.env.DRUPAL_BASE_URL!;
-  const fields = [
-    "title",
-    "field_slug",
-    "path",
-    "field_brief",
-    "body",
-    "field_body",
-    "field_thumbnail",
-    "field_hero",
-    "field_arcgis_sections",
-  ];
-  const include = [
-    "field_thumbnail",
-    "field_thumbnail.field_media_image",
-    "field_hero",
-    "field_hero.field_media_image",
-    "field_arcgis_sections",
-  ];
+  const fields = ["title", "field_slug", "path", "field_arcgis_sections"];
+  const include = ["field_arcgis_sections"];
   const qs =
     `?filter[field_slug][value]=${encodeURIComponent(slug)}` +
     `&filter[status]=1&page[limit]=1` +
@@ -197,27 +134,9 @@ async function fetchExhibitionDetailBySlug(slug: string): Promise<ExhibitionsRes
   return (await res.json()) as ExhibitionsResponse;
 }
 
-function ratioPadding(aspect: string): string {
-  const [wRaw, hRaw] = aspect.split("/");
-  const w = Number(wRaw);
-  const h = Number(hRaw);
-  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return "56.25%";
-  return `${(h / w) * 100}%`;
-}
-
-function ResponsiveIframe({
-  src,
-  title,
-  aspect = "16/9",
-  minVH = 70,
-}: {
-  src: string;
-  title: string;
-  aspect?: string;
-  minVH?: number;
-}) {
+function ResponsiveIframe({ src, title }: { src: string; title: string }) {
   return (
-    <div className="relative w-full bg-black" style={{ paddingTop: ratioPadding(aspect), minHeight: `${minVH}vh` }}>
+    <div className="relative h-[calc(100dvh-3.5rem)] w-full bg-black">
       <iframe
         className="absolute inset-0 h-full w-full"
         src={src}
@@ -245,58 +164,32 @@ export default async function Page({
   const included: IncludedArray = json.included ?? [];
   const title = node.attributes.title ?? "Untitled";
 
-  const hero =
-    fileUrl(included, node.relationships?.["field_hero"] as RelationshipSingle | undefined) ??
-    fileUrl(included, node.relationships?.["field_thumbnail"] as RelationshipSingle | undefined);
-
-  const html = node.attributes.body?.processed ?? node.attributes.field_body?.processed ?? null;
-
   const arcRel = getArcgisRel(node);
   const sections = resolveArcgisSections(included, arcRel);
 
   return (
-    <div className="py-10">
-      <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-xl font-semibold mb-4">{title}</h1>
-
-        {hero && (
-          <div className="relative w-full rounded-xl overflow-hidden border mb-6" style={{ paddingTop: "56.25%" }}>
-            <Image src={hero} alt={title} fill sizes="(min-width:1024px) 768px, 100vw" />
-          </div>
-        )}
-
-        {html && (
-          <article className="prose max-w-none mb-8">
-            <div dangerouslySetInnerHTML={{ __html: html }} />
-          </article>
-        )}
-      </div>
-
+    <div className="relative left-1/2 -my-10 w-screen -translate-x-1/2">
+      <h1 className="sr-only">{title}</h1>
       {sections.length > 0 && (
-        <div className="mt-10 w-full">
-          <section className="space-y-8">
-            {sections.map((s) => {
-              const url = arcgisUrlFromSection(s);
-              const label = s.attributes?.field_label ?? "ArcGIS";
+        <section className="w-full">
+          {sections.map((s) => {
+            const url = arcgisUrlFromSection(s);
+            const label = s.attributes?.field_label ?? "ArcGIS";
 
-              return (
-                <div key={s.id} className="w-full">
-                  <div className="max-w-3xl mx-auto px-4 mb-3">
-                    <h2 className="text-base font-medium">{label}</h2>
-                  </div>
-
-                  <div className="w-full border-y">
-                    {url ? (
-                      <ResponsiveIframe src={url} title={`${title} — ${label}`} aspect="16/9" minVH={80} />
-                    ) : (
-                      <div className="max-w-3xl mx-auto px-4 py-6 text-sm">Invalid or disallowed ArcGIS URL.</div>
-                    )}
-                  </div>
+            return (
+              <div key={s.id} className="w-full">
+                <h2 className="sr-only">{label}</h2>
+                <div className="w-full">
+                  {url ? (
+                    <ResponsiveIframe src={url} title={`${title} — ${label}`} />
+                  ) : (
+                    <div className="max-w-3xl mx-auto px-4 py-6 text-sm">Invalid or disallowed ArcGIS URL.</div>
+                  )}
                 </div>
-              );
-            })}
-          </section>
-        </div>
+              </div>
+            );
+          })}
+        </section>
       )}
     </div>
   );
