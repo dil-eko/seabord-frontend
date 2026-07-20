@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'dev-seabord.pantheonsite.io', pathname: '/**' },
       // add the live domain when ready:
       { protocol: 'https', hostname: 'seabord.pantheonsite.io', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.arcgis.com', pathname: '/sharing/rest/content/items/**' },
     ],
     // Alternative (older): domains: ['dev-seabord.pantheonsite.io']
   },
