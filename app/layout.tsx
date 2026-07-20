@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | Seabord",
   },
   description: "a digital gaze to the fortresses of eastern mediterranean.",
-  metadataBase: new URL("https://seabord-frontend.vercel.app"), // kendi domaininiz
+  metadataBase: new URL("https://www.seabord.eu"),
   openGraph: {
     type: "website",
     siteName: "Seabord",
@@ -29,7 +29,6 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.ico" },
 };
 
-// (opsiyonel) tarayıcı adres çubuğu rengi / dark-light için
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
